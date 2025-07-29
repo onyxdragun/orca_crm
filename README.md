@@ -1,36 +1,49 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Orca CRM
 
-## Getting Started
+**CRM with a Helpdesk Attitude**
 
-First, run the development server:
+Orca CRM is a modern, full-stack customer relationship management system built with Next.js, React, TypeScript, and Tailwind CSS. It is designed for robust management of customers, devices, tickets, and tasks, with a focus on type safety, best practices, and a clean user experience.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Project Overview
+Orca CRM provides:
+- Customer management (view, edit, add, and track customers)
+- Device management (associate devices with customers, track service history)
+- Ticketing system (create, assign, and manage support tickets)
+- Task management (track tasks related to tickets)
+- Context-driven UI for seamless navigation and state sharing
+- RESTful API routes with modern Next.js conventions
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Features
+- **Next.js App Router**: Modern routing and API handling
+- **React Context**: For sharing state (e.g., customerId) across components
+- **TypeScript**: Type-safe models and API responses
+- **Tailwind CSS**: Responsive, modern UI
+- **MariaDB**: Scalable SQL backend
+- **Modal Forms**: For editing and creating entities
+- **BigInt Serialization**: Safe handling of large IDs in API responses
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Tech Stack
+- Next.js 15+
+- React 18+
+- TypeScript
+- Tailwind CSS
+- MariaDB
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Folder Structure
+- `/src/app/` — Next.js pages and API routes
+- `/src/components/` — Reusable React components
+- `/src/context/` — React Context providers
+- `/src/types/` — Shared TypeScript types
+- `/src/lib/` — Database and utility functions
 
-## Learn More
+## API & Frontend Conventions
+- **Frontend routes** use name-based values for user-friendly URLs (e.g., `/customer/[name]`).
+- **Backend API routes** use ID-based values for reliability (e.g., `/api/customers/[id]`).
+- All API handlers use the modern Promise-based params pattern for Next.js 15+.
+- Context is used for sharing customerId and other state across the app.
 
-To learn more about Next.js, take a look at the following resources:
+## Contributing
+Pull requests and suggestions are welcome! Please follow best practices for Next.js, React, and TypeScript.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## License
+MIT

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import CustomerProviderWrapper from "@/components/ClientProviderWrapper";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -22,12 +23,15 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Only render children here; move LoginHeader to a Client Component wrapper
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-gray-700 text-white ${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <CustomerProviderWrapper>
+          {children}
+        </CustomerProviderWrapper>
       </body>
     </html>
   );

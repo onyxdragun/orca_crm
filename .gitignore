@@ -23,6 +23,8 @@
 # misc
 .DS_Store
 *.pem
+hash.js
+bcrypt-hash.js
 
 # debug
 npm-debug.log*

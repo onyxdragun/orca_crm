@@ -1,0 +1,29 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Next.js: Dev Server",
+      "type": "shell",
+      "command": "npm run dev",
+      "group": "build",
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "Next.js: Build",
+      "type": "shell",
+      "command": "npm run build",
+      "group": "build",
+      "isBackground": false,
+      "problemMatcher": []
+    },
+    {
+      "label": "Next.js: Lint",
+      "type": "shell",
+      "command": "npm run lint",
+      "group": "test",
+      "isBackground": false,
+      "problemMatcher": ["$eslint-stylish"]
+    }
+  ]
+}

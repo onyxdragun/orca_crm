@@ -1,103 +1,117 @@
-import Image from "next/image";
+'use client';
+import React, { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+
+import { TicketWithCustomer } from '@/types/ticket';
+import LoginHeader from '@/components/LoginHeader';
+import TicketList from '@/components/TicketList';
+import Modal from '@/components/Modal';
+import NewTicketForm from '@/components/NewTicketForm';
+import { transformTicketWithCustomerInput } from '@/utils/typeGuards';
+
 
 export default function Home() {
-  return (
-    <div className="font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="font-mono list-inside list-decimal text-sm/6 text-center sm:text-left">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] font-mono font-semibold px-1 py-0.5 rounded">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [tickets, setTickets] = useState<TicketWithCustomer[]>([]);
+  const [showNewTicketModal, setShowNewTicketModal] = useState(false);
+  const router = useRouter();
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+  async function handleLogout() {
+    await fetch('/api/logout', { method: 'POST', credentials: 'include' });
+    setIsLoggedIn(false);
+    window.location.reload();
+  }
+
+  async function handleLogin(username: string, password: string) {
+    try {
+      const res = await fetch('/api/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password }),
+        credentials: 'include', // ensure cookies are sent
+      });
+      if (res.ok) {
+        // After login, check /api/me for auth status
+        const meRes = await fetch('/api/me', { credentials: 'include' });
+        const meData = await meRes.json();
+        if (meRes.ok && meData.loggedIn) {
+          setIsLoggedIn(true);
+        } else {
+          alert('Login failed');
+        }
+      } else {
+        const data = await res.json();
+        alert(data.error || 'Login failed');
+      }
+    } catch {
+      alert('Login error');
+    }
+  }
+
+  useEffect(() => {
+    async function checkLogin() {
+      const res = await fetch('/api/me', { credentials: 'include' });
+      const data = await res.json();
+      setIsLoggedIn(res.ok && data.loggedIn);
+    }
+    checkLogin();
+  }, []);
+
+  useEffect(() => {
+    async function fetchTickets() {
+      if (!isLoggedIn) return;
+      const res = await fetch('/api/tickets?status=!closed&limit=5');
+      const data = await res.json();
+      const tickets = data.map(transformTicketWithCustomerInput);
+      console.log("Tickets:" , tickets);
+      setTickets(tickets);
+    }
+    fetchTickets();
+  }, [isLoggedIn]);
+
+  return (
+    <>
+      <LoginHeader onLogin={handleLogin} isLoggedIn={isLoggedIn} onLogout={handleLogout} />
+      <main className="flex flex-col justify-center min-h-[80vh] p-4 bg-transparent w-full max-w-full md:max-w-4xl md:mx-auto">
+        {isLoggedIn ? (
+          <>
+            <TicketList<TicketWithCustomer>
+              tickets={tickets}
+              onNewTicket={() => setShowNewTicketModal(true)}
+              customerName={''}
+              showCustomerName={true}
+              title="Recent Tickets"
+              onSelectTicket={ticket => {
+                // Use ticket.customer_name if available, else fallback
+                let customerName = ticket.customer_name || '';
+                customerName = customerName.replace(/\s+/g, '-');
+                if (ticket.ticket_number) {
+                  router.push(`/customer/${customerName}/ticket/${ticket.ticket_number}`);
+                }
+              }}
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
+            <Modal isOpen={showNewTicketModal} onClose={() => setShowNewTicketModal(false)}>
+              <NewTicketForm customerId={0} onCreated={() => setShowNewTicketModal(false)} />
+            </Modal>
+          </>
+        ) : (
+          <>
+            <h1 className="text-4xl font-bold mb-4">Orca CRM</h1>
+            <p className="text-lg mb-6 max-w-xl">
+              Welcome to Orca CRM — a simple, private customer relationship management system designed for personal use. Track customers, tickets, and worklogs with a clean interface and secure authentication.
+            </p>
+            <ul className="text-left max-w-md mx-auto list-disc list-inside mb-8">
+              <li>Manage customer details and status (lead, current, inactive)</li>
+              <li>Track tickets and helpdesk requests</li>
+              <li>Log work and hours for each ticket</li>
+              <li>Secure login with JWT authentication</li>
+              <li>Powered by Next.js, React, TypeScript, Tailwind CSS, and MariaDB</li>
+            </ul>
+            <span className="text-sm text-gray-300 mb-8">Made for orcaisletech.com</span>
+            <div className="mt-8 text-lg text-gray-300">Please log in to access Orca CRM.</div>
+          </>
+        )}
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+    </>
   );
 }
